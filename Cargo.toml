@@ -1,6 +1,8 @@
 [package]
-name = "ray-trace-wraikny"
+name = "raytrace"
 version = "0.1.0"
 authors = ["wraikny <writtenknown@gmail.com>"]
 
 [dependencies]
+rayon = "*"
+rand = "*"
