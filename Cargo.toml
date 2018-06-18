@@ -1,0 +1,6 @@
+[package]
+name = "ray-trace-wraikny"
+version = "0.1.0"
+authors = ["wraikny <writtenknown@gmail.com>"]
+
+[dependencies]
