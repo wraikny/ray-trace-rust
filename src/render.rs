@@ -17,6 +17,18 @@ pub struct RenderSetting {
     pub scene : Scene,
 }
 
+impl Default for RenderSetting {
+    fn default() -> RenderSetting {
+        RenderSetting {
+            window_size : (1200, 800),
+            spp : 1000,
+            reflect_n : 10,
+            camera : Default::default(),
+            scene : Default::default(),
+        }
+    }
+}
+
 struct TangentSpace(Vec3, Vec3);
 
 impl TangentSpace {

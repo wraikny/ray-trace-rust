@@ -1,31 +1,11 @@
 extern crate raytrace;
 
-use raytrace::{io, render, env};
+use raytrace::{io, render};
 
 fn main() {
-    let window_size = (1200, 800);
-
-    /*
-        let camera = Camera::new(
-            (5.0, 5.0, 5.0),
-            (0.0, 0.0, 0.0),
-            (0.0, 1.0, 0.0),
-            30.0,
-            (w as f64) / (h as f64)
-        );
-
-        let scene = Scene::new(vec![
-            Sphere::new((-0.5, 0.0, 0.0), 1.0, (1.0, 0.0, 0.0)),
-            Sphere::new(( 0.5, 0.0, 0.0), 1.0, (0.0, 1.0, 0.0)),
-        ]);
-    */
-
     let rs = render::RenderSetting {
-        window_size,
-        spp : 1000,
-        reflect_n : 10,
-        camera : env::Camera::default(),
-        scene : env::Scene::default(),
+        spp : 3500,
+        .. Default::default()
     };
 
     let colors = render::run(&rs);

@@ -14,8 +14,8 @@ pub struct Camera {
     pub ve : Vec3,
 }
 
-impl Camera {
-    pub fn default() -> Camera {
+impl Default for Camera {
+    fn default() -> Camera {
         let position = Vec3::new((50.0, 52.0, 295.6));
         Camera::new(
             position,
@@ -75,12 +75,8 @@ pub struct Scene {
     pub spheres : Vec<Sphere>
 }
 
-impl Scene {
-    pub fn new(spheres : Vec<Sphere>) -> Scene {
-        Scene{spheres}
-    }
-
-    pub fn default() -> Scene {
+impl Default for Scene {
+    fn default() -> Scene {
         let k = 10.0f64.powi(5);
         Scene::new(vec![
             Sphere{point : Vec3::new((k + 1. , 40.8, 81.6))    , radius : k   , reflectance : Vec3::new((0.75, 0.25, 0.25))   , ..Default::default()}, // left wall
@@ -92,6 +88,12 @@ impl Scene {
             Sphere{point : Vec3::new((73., 16.5, 78.))         , radius : 16.5, reflectance : Vec3::new((0.999, 0.999, 0.999)), ..Default::default()}, // right ball
             Sphere{point : Vec3::new((50., 681.6 - 0.27, 81.6)), radius : 600., reflectance : Vec3::new((0.0, 0.0, 0.0))      , le : Vec3::new(12.0)}, // ceiling holl
         ])
+    }
+}
+
+impl Scene {
+    pub fn new(spheres : Vec<Sphere>) -> Scene {
+        Scene{spheres}
     }
 
     pub fn hit(&self, ray : &Ray, tm : (f64, f64)) -> Option<(HitRecord)> {
