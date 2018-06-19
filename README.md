@@ -5,5 +5,8 @@
 を受講して、Rustでレイトレーシング を実装しました！
 
 ## result
-spp = 3500, reflectance_num = 10
-![result](result-3500-10.png)
+spp = 5000, reflectance_num = 10
+![result](result-5000-10.png)
+
+spp = 5000, reflectance_num = 10
+![result2](result2-3000-20.png)

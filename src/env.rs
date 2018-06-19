@@ -92,7 +92,7 @@ impl Default for Scene {
 }
 
 impl Scene {
-    pub(crate) fn new(spheres : Vec<Sphere>) -> Scene {
+    pub fn new(spheres : Vec<Sphere>) -> Scene {
         Scene{spheres}
     }
 
