@@ -8,10 +8,9 @@ fn main() {
         .. Default::default()
     };
 
-    let colors = render::run(&rs);
-    let filename = format!("result-{}-{}.ppm", &rs.spp, &rs.reflect_n);
-    match io::write_image(rs.window_size, colors, &filename) {
-        Ok(()) => (),
-        Err(e) => println!("Error: {}", e),
+    let cs = render::run(&rs);
+    let f = format!("result-{}-{}.ppm", &rs.spp, &rs.reflect_n);
+    if let Err(e) = io::write_image(rs.window_size, cs, &f) {
+        println!("Error: {}", e);
     }
 }
