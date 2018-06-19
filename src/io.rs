@@ -38,7 +38,7 @@ impl std::error::Error for WriteImageError {
 
 pub fn write_image((w, h) : (usize, usize), colors : Vec<(u8, u8, u8)>, filename : &str) -> Result<(), WriteImageError> {
     if colors.len() == w * h {
-        let file = fs::File::create(filename)?;
+        let file = fs::File::create(filename.to_owned() + ".ppm")?;
 
         let mut f = BufWriter::new(file);
 
