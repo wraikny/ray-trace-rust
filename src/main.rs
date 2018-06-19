@@ -22,7 +22,7 @@ fn main() {
 
     let rs = render::RenderSetting {
         window_size,
-        spp : 100,
+        spp : 1000,
         reflect_n : 10,
         camera : env::Camera::default(),
         scene : env::Scene::default(),
