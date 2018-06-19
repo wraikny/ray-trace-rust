@@ -43,12 +43,12 @@ impl std::fmt::Debug for MyError {
 
 fn main() -> Result<(), MyError> {
     let rs = render::RenderSetting {
-        spp : 500,
-        reflect_n : 20,
+        spp : 5000,
+        reflect_n : 10,
         .. Default::default()
     };
 
-    let cs = render::run(&rs, 9)?;
+    let cs = render::run(&rs)?;
     let f = format!("result-{}-{}", &rs.spp, &rs.reflect_n);
     io::write_image(rs.window_size, cs, f.clone())?;
 

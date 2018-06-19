@@ -49,12 +49,10 @@ fn tonemap(v : Vec3) -> (u8, u8, u8) {
     (f(v.x), f(v.y), f(v.z))
 }
 
-pub fn run(rs : &RenderSetting, thnum : usize) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBuildError> {
-    let pool = rayon::ThreadPoolBuilder::new().num_threads(thnum).build()?;
+pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBuildError> {
     
     let (w, h) = rs.window_size;
-    let colors : Vec<_> = pool.install(||{
-        (0..w*h).into_par_iter().map(|i| {
+    let colors : Vec<_> = (0..w*h).into_par_iter().map(|i| {
             let v : Vec3 = (0..rs.spp).into_par_iter().map(|_|{
                 let i : f64 = i as f64;
                 let (w, h) = (w as f64, h as f64);
@@ -115,7 +113,7 @@ pub fn run(rs : &RenderSetting, thnum : usize) -> Result<Vec<(u8, u8, u8)>, rayo
                 sum / (rs.spp as f64)
             }).reduce(|| Vec3::new(0.0), |s, x| s + x);
             tonemap(v)
-        }).collect()});
+        }).collect();
     
     Ok(colors)
 
