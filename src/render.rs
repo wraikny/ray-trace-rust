@@ -63,13 +63,15 @@ pub fn run(rs : &RenderSetting) -> Vec<(u8, u8, u8)> {
                     },
                 };
 
-                let mut th = Vec3::new(1.0);
-                (0..rs.reflect_n).map(|_depth| {
-                    if th.x.max(th.y.max(th.z)) != 0.0 {
+                let mut sum = Vec3::new(0.0);
+                let mut thp = Vec3::new(1.0);
+
+                for _depth in (0..rs.reflect_n) {
+                    if thp.x.max(thp.y.max(thp.z)) != 0.0 {
                         let h = rs.scene.hit(&ray, (0.1f64.powi(4), 10.0f64.powi(10)));
 
                         if let Some(hr) = h {
-                            let result = th * hr.sphere.le;
+                            sum = sum + thp * hr.sphere.le;
                             ray = Ray {
                                 origin : hr.point,
                                 direction : {
@@ -88,16 +90,12 @@ pub fn run(rs : &RenderSetting) -> Vec<(u8, u8, u8)> {
                                     u * d.x + v * d.y + n * d.z
                                 }
                             };
-
-                            th = th * hr.sphere.reflectance;
-                            result
-                        } else {
-                            Vec3::new(0.0)
+                            
+                            thp = thp * hr.sphere.reflectance;
                         }
-                    } else {
-                        Vec3::new(0.0)
                     }
-                }).fold(Vec3::new(0.0), |s, x| s + x) / (rs.spp as f64)
+                }
+                sum / (rs.spp as f64)
             }).reduce(|| Vec3::new(0.0), |s, x| s + x);
             tonemap(v)
         }).collect();
