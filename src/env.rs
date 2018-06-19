@@ -81,12 +81,12 @@ impl Default for Scene {
         Scene::new(vec![
             Sphere{point : Vec3::new((k + 1. , 40.8, 81.6))    , radius : k   , reflectance : Vec3::new((0.75, 0.25, 0.25))   , ..Default::default()}, // left wall
             Sphere{point : Vec3::new((-k + 99., 40.8, 81.6))   , radius : k   , reflectance : Vec3::new((0.25, 0.25, 0.75))   , ..Default::default()}, // right wall
-            Sphere{point : Vec3::new((50., 40.8, k))           , radius : k   , reflectance : Vec3::new((0.75, 0.75, 0.75))   , ..Default::default()}, // far side wall
-            Sphere{point : Vec3::new((50., k, 81.6))           , radius : k   , reflectance : Vec3::new((0.75, 0.75, 0.75))   , ..Default::default()}, // floor
-            Sphere{point : Vec3::new((50., -k + 81.6, 81.6))   , radius : k   , reflectance : Vec3::new((0.75, 0.75, 0.75))   , ..Default::default()}, // ceilling
-            Sphere{point : Vec3::new((27., 16.5, 47.))         , radius : 16.5, reflectance : Vec3::new((0.999, 0.999, 0.999)), ..Default::default()}, // left ball
-            Sphere{point : Vec3::new((73., 16.5, 78.))         , radius : 16.5, reflectance : Vec3::new((0.999, 0.999, 0.999)), ..Default::default()}, // right ball
-            Sphere{point : Vec3::new((50., 681.6 - 0.27, 81.6)), radius : 600., reflectance : Vec3::new((0.0, 0.0, 0.0))      , le : Vec3::new(12.0)}, // ceiling holl
+            Sphere{point : Vec3::new((50., 40.8, k))           , radius : k   , reflectance : Vec3::new(0.75)   , ..Default::default()}, // far side wall
+            Sphere{point : Vec3::new((50., k, 81.6))           , radius : k   , reflectance : Vec3::new(0.75)   , ..Default::default()}, // floor
+            Sphere{point : Vec3::new((50., -k + 81.6, 81.6))   , radius : k   , reflectance : Vec3::new(0.75)   , ..Default::default()}, // ceilling
+            Sphere{point : Vec3::new((27., 16.5, 47.))         , radius : 16.5, reflectance : Vec3::new(0.999), ..Default::default()}, // left ball
+            Sphere{point : Vec3::new((73., 16.5, 78.))         , radius : 16.5, reflectance : Vec3::new(0.999), ..Default::default()}, // right ball
+            Sphere{point : Vec3::new((50., 681.6 - 0.27, 81.6)), radius : 600., reflectance : Vec3::new(0.0)      , le : Vec3::new(12.0)}, // ceiling holl
         ])
     }
 }
@@ -96,7 +96,7 @@ impl Scene {
         Scene{spheres}
     }
 
-    pub fn hit(&self, ray : &Ray, tm : (f64, f64)) -> Option<(HitRecord)> {
+    pub(crate) fn hit(&self, ray : &Ray, tm : (f64, f64)) -> Option<(HitRecord)> {
         self.spheres.par_iter().map(|s : &Sphere| {
             s.hit(ray, tm).map(|t| (s, t))
         }).reduce(|| None, |m, v| {
