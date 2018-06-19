@@ -9,6 +9,14 @@ use std;
 extern crate rand;
 use render::rand::random;
 
+pub struct RenderSetting {
+    pub window_size : (usize, usize),
+    pub spp : usize,
+    pub reflect_n : usize,
+    pub camera : Camera,
+    pub scene : Scene,
+}
+
 struct TangentSpace(Vec3, Vec3);
 
 impl TangentSpace {
@@ -28,59 +36,17 @@ fn tonemap(v : Vec3) -> (u8, u8, u8) {
     (f(v.x), f(v.y), f(v.z))
 }
 
-pub fn run((w, h) : (usize, usize)) -> Vec<(u8, u8, u8)> {
-
-
-    let spp = 1000;
-
-    /*
-    let camera = Camera::new(
-        (5.0, 5.0, 5.0),
-        (0.0, 0.0, 0.0),
-        (0.0, 1.0, 0.0),
-        30.0,
-        (w as f64) / (h as f64)
-    );
-
-    let scene = Scene::new(vec![
-        Sphere::new((-0.5, 0.0, 0.0), 1.0, (1.0, 0.0, 0.0)),
-        Sphere::new(( 0.5, 0.0, 0.0), 1.0, (0.0, 1.0, 0.0)),
-    ]);
-
-    */
-    
-    let camera = {
-        let position = Vec3::new((50.0, 52.0, 295.6));
-        Camera::new(
-            position,
-            position + Vec3::new((0.0, -0.042612, -1.0)),
-            Vec3::new((0.0, 1.0, 0.0)),
-            30.0,
-            (w as f64) / (h as f64)
-        )
-    };
-
-    let k = 10.0f64.powi(5);
-    let scene = Scene::new(vec![
-        Sphere{point : Vec3::new((k + 1. , 40.8, 81.6))    , radius : k   , reflectance : Vec3::new((0.75, 0.25, 0.25))   , ..Default::default()}, // left wall
-        Sphere{point : Vec3::new((-k + 99., 40.8, 81.6))   , radius : k   , reflectance : Vec3::new((0.25, 0.25, 0.75))   , ..Default::default()}, // right wall
-        Sphere{point : Vec3::new((50., 40.8, k))           , radius : k   , reflectance : Vec3::new((0.75, 0.75, 0.75))   , ..Default::default()}, // far side wall
-        Sphere{point : Vec3::new((50., k, 81.6))           , radius : k   , reflectance : Vec3::new((0.75, 0.75, 0.75))   , ..Default::default()}, // floor
-        Sphere{point : Vec3::new((50., -k + 81.6, 81.6))   , radius : k   , reflectance : Vec3::new((0.75, 0.75, 0.75))   , ..Default::default()}, // ceilling
-        Sphere{point : Vec3::new((27., 16.5, 47.))         , radius : 16.5, reflectance : Vec3::new((0.999, 0.999, 0.999)), ..Default::default()}, // left ball
-        Sphere{point : Vec3::new((73., 16.5, 78.))         , radius : 16.5, reflectance : Vec3::new((0.999, 0.999, 0.999)), ..Default::default()}, // right ball
-        Sphere{point : Vec3::new((50., 681.6 - 0.27, 81.6)), radius : 600., reflectance : Vec3::new((0.0, 0.0, 0.0))      , le : Vec3::new(12.0)}, // ceiling holl
-    ]);
-
+pub fn run(rs : &RenderSetting) -> Vec<(u8, u8, u8)> {
+    let (w, h) = rs.window_size;
     
     let colors : Vec<_> = (0..w*h).into_par_iter()
         .map(|i| {
-            let v : Vec3 = (0..spp).into_par_iter().map(|_|{
+            let v : Vec3 = (0..rs.spp).into_par_iter().map(|_|{
                 let i : f64 = i as f64;
                 let (w, h) = (w as f64, h as f64);
                 let (x, y) = (i % w, h - i / w);
 
-                let c = &camera;
+                let c = &rs.camera;
 
                 let mut ray = Ray{
                     origin : c.position,
@@ -89,17 +55,18 @@ pub fn run((w, h) : (usize, usize)) -> Vec<(u8, u8, u8)> {
                         let (rpx, rpy) = (2.0 * (x + random::<f64>()) / w - 1.0, 2.0 * (y + random::<f64>()) / h - 1.0);
 
                         // カメラ座標系での方向
-                        let w = Vec3::new((c.aspect * tf * rpx, tf * rpy, -1.0)).normalize();
+                        let aspect = w / h;
+                        let wd = Vec3::new((aspect * tf * rpx, tf * rpy, -1.0)).normalize();
 
                         // ワールド座標系に変換
-                        c.ue * w.x + c.ve * w.y + c.we * w.z
+                        c.ue * wd.x + c.ve * wd.y + c.we * wd.z
                     },
                 };
 
                 let mut th = Vec3::new(1.0);
-                (0..10).map(|_depth| {
+                (0..rs.reflect_n).map(|_depth| {
                     if th.x.max(th.y.max(th.z)) != 0.0 {
-                        let h = scene.hit(&ray, (0.1f64.powi(4), 10.0f64.powi(10)));
+                        let h = rs.scene.hit(&ray, (0.1f64.powi(4), 10.0f64.powi(10)));
 
                         if let Some(hr) = h {
                             let result = th * hr.sphere.le;
@@ -130,7 +97,7 @@ pub fn run((w, h) : (usize, usize)) -> Vec<(u8, u8, u8)> {
                     } else {
                         Vec3::new(0.0)
                     }
-                }).fold(Vec3::new(0.0), |s, x| s + x) / (spp as f64)
+                }).fold(Vec3::new(0.0), |s, x| s + x) / (rs.spp as f64)
             }).reduce(|| Vec3::new(0.0), |s, x| s + x);
             tonemap(v)
         }).collect();
