@@ -49,8 +49,8 @@ fn tonemap(v : Vec3) -> (u8, u8, u8) {
     (f(v.x), f(v.y), f(v.z))
 }
 
-pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBuildError> {
-    let pool = rayon::ThreadPoolBuilder::new().num_threads(100).build()?;
+pub fn run(rs : &RenderSetting, thnum : usize) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBuildError> {
+    let pool = rayon::ThreadPoolBuilder::new().num_threads(thnum).build()?;
     
     let (w, h) = rs.window_size;
     let colors : Vec<_> = pool.install(||{
@@ -68,7 +68,7 @@ pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBu
                         let tf = f64::tan(c.fov * 0.5);
                         let rpx = 2.0 * (x + random::<f64>()) / w - 1.0;
                         let rpy = 2.0 * (y + random::<f64>()) / h - 1.0;
-                        
+
                         // カメラ座標系での方向
                         let aspect = w / h;
                         let wd = Vec3::new((aspect * tf * rpx, tf * rpy, -1.0)).normalize();
