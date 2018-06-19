@@ -66,33 +66,35 @@ pub fn run(rs : &RenderSetting) -> Vec<(u8, u8, u8)> {
                 let mut sum = Vec3::new(0.0);
                 let mut thp = Vec3::new(1.0);
 
-                for _depth in (0..rs.reflect_n) {
-                    if thp.x.max(thp.y.max(thp.z)) != 0.0 {
-                        let h = rs.scene.hit(&ray, (0.1f64.powi(4), 10.0f64.powi(10)));
+                'reflect: for _depth in 0..rs.reflect_n {
+                    let h = rs.scene.hit(&ray, (0.1f64.powi(4), 10.0f64.powi(10)));
 
-                        if let Some(hr) = h {
-                            sum = sum + thp * hr.sphere.le;
-                            ray = Ray {
-                                origin : hr.point,
-                                direction : {
-                                    let n = if hr.normal.dot(&-ray.direction) > 0.0 {
-                                        hr.normal
-                                    } else {
-                                        -hr.normal
-                                    };
-                                    let TangentSpace(u, v) = TangentSpace::new(&n);
-                                    let d = {
-                                        let r = random::<f64>().sqrt();
-                                        let t : f64 = 2.0 * std::f64::consts::PI * random::<f64>();
-                                        let (x, y) = (r * t.cos(), r * t.sin());
-                                        Vec3{x, y, z : 0.0f64.max(1.0 - (x * x + y * y))}
-                                    };
-                                    u * d.x + v * d.y + n * d.z
-                                }
-                            };
-                            
-                            thp = thp * hr.sphere.reflectance;
-                        }
+                    if let Some(hr) = h {
+                        sum = sum + thp * hr.sphere.le;
+                        ray = Ray {
+                            origin : hr.point,
+                            direction : {
+                                let n = if hr.normal.dot(&-ray.direction) > 0.0 {
+                                    hr.normal
+                                } else {
+                                    -hr.normal
+                                };
+                                let TangentSpace(u, v) = TangentSpace::new(&n);
+                                let d = {
+                                    let r = random::<f64>().sqrt();
+                                    let t : f64 = 2.0 * std::f64::consts::PI * random::<f64>();
+                                    let (x, y) = (r * t.cos(), r * t.sin());
+                                    Vec3{x, y, z : 0.0f64.max(1.0 - (x * x + y * y))}
+                                };
+                                u * d.x + v * d.y + n * d.z
+                            }
+                        };
+                        
+                        thp = thp * hr.sphere.reflectance;
+                    }
+                    
+                    if thp.x.max(thp.y.max(thp.z)) == 0.0 {
+                        break 'reflect;
                     }
                 }
                 sum / (rs.spp as f64)
