@@ -5,7 +5,7 @@ use raytrace::io;
 fn main() {
     let win_size = (1200, 800);
     let colors = render::run(win_size);
-    match io::write_image(win_size, colors) {
+    match io::write_image(win_size, colors, "result-1.ppm") {
         Ok(()) => (),
         Err(e) => println!("Error: {}", e),
     }
