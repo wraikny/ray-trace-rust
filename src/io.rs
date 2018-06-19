@@ -26,6 +26,16 @@ impl std::fmt::Display for WriteImageError {
     }
 }
 
+impl std::error::Error for WriteImageError {
+    fn description(&self) -> &str {
+        use io::WriteImageError::*;
+        match self {
+            Io(e) => e.description(),
+            VecLen(s) => &s,
+        }
+    }
+}
+
 pub fn write_image((w, h) : (usize, usize), colors : Vec<(u8, u8, u8)>, filename : &str) -> Result<(), WriteImageError> {
     if colors.len() == w * h {
         let file = fs::File::create(filename)?;
