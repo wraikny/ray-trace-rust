@@ -2,7 +2,7 @@ extern crate raytrace;
 
 use raytrace::{io, render};
 
-fn main() {
+fn main() -> Result<(), io::WriteImageError> {
     let rs = render::RenderSetting {
         spp : 3500,
         .. Default::default()
@@ -10,7 +10,5 @@ fn main() {
 
     let cs = render::run(&rs);
     let f = format!("result-{}-{}.ppm", &rs.spp, &rs.reflect_n);
-    if let Err(e) = io::write_image(rs.window_size, cs, &f) {
-        println!("Error: {}", e);
-    }
+    io::write_image(rs.window_size, cs, &f)
 }
