@@ -33,7 +33,7 @@ struct TangentSpace(Vec3, Vec3);
 
 impl TangentSpace {
     fn new(n : &Vec3) -> TangentSpace {
-        let s = n.z / n.z.abs();
+        let s = n.z.signum();
         let a = -1.0 / (s + n.z);
         let b = n.x * n.y * a;
         TangentSpace(
