@@ -66,8 +66,9 @@ pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBu
                     origin : c.position,
                     direction : {
                         let tf = f64::tan(c.fov * 0.5);
-                        let (rpx, rpy) = (2.0 * (x + random::<f64>()) / w - 1.0, 2.0 * (y + random::<f64>()) / h - 1.0);
-
+                        let rpx = 2.0 * (x + random::<f64>()) / w - 1.0;
+                        let rpy = 2.0 * (y + random::<f64>()) / h - 1.0;
+                        
                         // カメラ座標系での方向
                         let aspect = w / h;
                         let wd = Vec3::new((aspect * tf * rpx, tf * rpy, -1.0)).normalize();
