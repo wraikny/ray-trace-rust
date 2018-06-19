@@ -1,19 +1,19 @@
 use geo::*;
 
-pub struct Ray {
+pub(crate) struct Ray {
     pub origin : Vec3,
     pub direction: Vec3,
 }
 
 #[derive(Copy, Clone)]
-pub struct HitRecord {
+pub(crate) struct HitRecord {
     pub sphere : Sphere,
     pub t : f64,
     pub point : Vec3,
     pub normal : Vec3,
 }
 
-pub trait Hit {
+pub(crate) trait Hit {
     fn hit(&self, &Ray, (f64, f64)) -> Option<f64>;
 }
 
