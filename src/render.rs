@@ -50,8 +50,7 @@ fn tonemap(v : Vec3) -> (u8, u8, u8) {
 }
 
 pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBuildError> {
-    let pool = rayon::ThreadPoolBuilder::new()
-        .num_threads(100).build()?;
+    let pool = rayon::ThreadPoolBuilder::new().num_threads(100).build()?;
     
     let (w, h) = rs.window_size;
     let colors : Vec<_> = pool.install(||{
