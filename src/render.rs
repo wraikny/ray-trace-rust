@@ -15,7 +15,8 @@ pub enum RenderMode {
     Shade,
     Normal,
     NormalColor,
-    Depth,
+    Depth(f64),
+    DepthNormalColor(f64)
 }
 
 impl fmt::Display for RenderMode {
@@ -25,7 +26,8 @@ impl fmt::Display for RenderMode {
             Shade => "Shade",
             Normal => "Normal",
             NormalColor => "NormalColor",
-            Depth => "Depth",
+            Depth(_) => "Depth",
+            DepthNormalColor(_) => "DepthNormalColor",
         };
 
         write!(f, "{}", n)
@@ -150,18 +152,28 @@ pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBu
                         Vec3::new(0.0)
                     }
                 },
-                RenderMode::Depth => {
+                RenderMode::Depth(d) => {
                     let ray = create_ray(x, y);
 
                     let h = rs.scene.hit(&ray, c.tm);
                     if let Some(hr) = h {
-                        Vec3::new(hr.t / 3000.0)
+                        Vec3::new(1.0 - hr.t / d)
+                    } else {
+                        Vec3::new(0.0)
+                    }
+                },
+                RenderMode::DepthNormalColor(d) => {
+                    let ray = create_ray(x, y);
+
+                    let h = rs.scene.hit(&ray, c.tm);
+                    if let Some(hr) = h {
+                        let r = hr.sphere.reflectance * hr.normal.dot(&&-ray.direction);
+                        r / r.x.max(r.y.max(r.z)) * (1.0 - hr.t / d)
                     } else {
                         Vec3::new(0.0)
                     }
                 }
             };
-
             tonemap(v)
         }).collect();
     

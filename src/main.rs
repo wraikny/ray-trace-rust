@@ -84,7 +84,7 @@ fn main() -> Result<(), MyError> {
                 Sphere{point : Vec3::new((50.0     , 681.6 - 0.27, 81.6)), radius : 600., reflectance : Vec3::new(0.0)   , le : Vec3::new(6.0)}, // ceiling holl
             ])
         },
-        mode : render::RenderMode::NormalColor,
+        mode : render::RenderMode::DepthNormalColor(500.0),
         ..Default::default()
     };
     
