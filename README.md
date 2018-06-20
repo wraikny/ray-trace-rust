@@ -6,19 +6,19 @@
 
 ## result
 spp = 1000, reflectance_num = 10
-![result-1000-10](result-1000-10.png)
+![result-1000-10](img/png/result-1000-10.png)
 
 spp = 5000, reflectance_num = 10
-![result-5000-10](result-5000-10.png)
+![result-5000-10](img/png/result-5000-10.png)
 
 spp = 3000, reflectance_num = 20
-![result2-3000-20](result-3000-20.png)
+![result2-3000-20](img/png/result-3000-20.png)
 
 Normal, Reflectance, Depth
-![result2-dnc](result-DepthNormalColor.png)
+![result2-dnc](img/png/result-DepthNormalColor.png)
 
 Normal, Reflectance
-![result2-nc](result-NormalColor.png)
+![result2-nc](img/png/result-NormalColor.png)
 
 Depth
-![result2-d](result-Depth.png)
+![result2-d](img/png/result-Depth.png)

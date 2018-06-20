@@ -84,7 +84,7 @@ fn main() -> Result<(), MyError> {
                 Sphere{point : Vec3::new((50.0     , 681.6 - 0.27, 81.6)), radius : 600., reflectance : Vec3::new(0.0)   , le : Vec3::new(6.0)}, // ceiling holl
             ])
         },
-        mode : render::RenderMode::DepthNormalColor(500.0),
+        mode : render::RenderMode::NormalColor,
         ..Default::default()
     };
     
@@ -100,17 +100,20 @@ fn main() -> Result<(), MyError> {
         }
     };
 
-    io::write_image(rs.window_size, cs, f.clone())?;
+    io::write_image(rs.window_size, cs, format!("img/ppm/{}", &f))?;
+
+    let f_ppm = format!("img/ppm/{}.ppm", &f);
+    let f_png = format!("img/png/{}.png", &f);
 
     if true {
         use std::process::Command;
-        let mut p1 = Command::new("imgcat").arg(f.clone() + ".ppm").spawn()?;
-        let mut p2 = Command::new("convert").arg(f.clone() + ".ppm").arg(f.clone() + ".png").spawn()?;
+        let mut p1 = Command::new("imgcat").arg(&f_ppm).spawn()?;
+        let mut p2 = Command::new("convert").arg(&f_ppm).arg(&f_png).spawn()?;
         
-        println!("imgcat {}", f.clone() + ".ppm");
+        println!("imgcat {}", &f_ppm);
         measure!(p1.wait())?;
         
-        println!("convert {} {}", f.clone() + ".ppm", f.clone() + ".png");
+        println!("convert {} {}", &f_ppm, &f_png);
         measure!(p2.wait())?;
     }
 
