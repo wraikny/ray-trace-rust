@@ -1,8 +1,22 @@
 extern crate raytrace;
 use raytrace::{io, render};
 
-use std::fmt;
+use std::{fmt, time};
+
 extern crate rayon;
+
+macro_rules! measure {
+  ( $x:expr) => {
+    {
+      let start = time::Instant::now();
+      let result = $x;
+      let end = start.elapsed();
+      println!("Time: {}.{:03}sec", end.as_secs(), end.subsec_nanos() / 1_000_000);
+      result
+    }
+  };
+}
+
 
 enum MyError {
     Run(rayon::ThreadPoolBuildError),
@@ -37,11 +51,11 @@ impl std::fmt::Debug for MyError {
             WriteImage(e) => write!(f, "{:?}", e),
             Command(e) => write!(f, "{:?}", e),
         }
-        
     }
 }
 
 fn main() -> Result<(), MyError> {
+    
     let rs = render::RenderSetting {
         spp : 3000,
         reflect_n : 20,
@@ -70,20 +84,34 @@ fn main() -> Result<(), MyError> {
                 Sphere{point : Vec3::new((50.0     , 681.6 - 0.27, 81.6)), radius : 600., reflectance : Vec3::new(0.0)   , le : Vec3::new(6.0)}, // ceiling holl
             ])
         },
-        // mode : render::RenderMode::Normal,
+        mode : render::RenderMode::NormalColor,
         ..Default::default()
     };
+    
+    println!("render::run");
+    let cs = measure!(render::run(&rs))?;
+    
+    let f = match &rs.mode {
+        render::RenderMode::Shade => {
+            format!("result-{}-{}", &rs.spp, &rs.reflect_n)
+        },
+        _ => {
+            format!("result-{}", &rs.mode)
+        }
+    };
 
-    let cs = render::run(&rs)?;
-    let f = format!("result2-{}-{}", &rs.spp, &rs.reflect_n);
     io::write_image(rs.window_size, cs, f.clone())?;
 
     if true {
         use std::process::Command;
         let mut p1 = Command::new("imgcat").arg(f.clone() + ".ppm").spawn()?;
-        let mut p2 = Command::new("convert").arg(f.clone() + ".ppm").arg(f + ".png").spawn()?;
-        p1.wait()?;
-        p2.wait()?;
+        let mut p2 = Command::new("convert").arg(f.clone() + ".ppm").arg(f.clone() + ".png").spawn()?;
+        
+        println!("imgcat {}", f.clone() + ".ppm");
+        measure!(p1.wait())?;
+        
+        println!("convert {} {}", f.clone() + ".ppm", f.clone() + ".png");
+        measure!(p2.wait())?;
     }
 
     Ok(())

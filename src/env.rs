@@ -12,6 +12,7 @@ pub struct Camera {
     pub we : Vec3,
     pub ue : Vec3,
     pub ve : Vec3,
+    pub tm : (f64, f64),
 }
 
 impl Default for Camera {
@@ -22,12 +23,33 @@ impl Default for Camera {
             position + Vec3::new((0.0, -0.042612, -1.0)),
             Vec3::new((0.0, 1.0, 0.0)),
             30.0,
+            (0.1f64.powi(4), 10.0f64.powi(10)),
         )
     }
 }
 
+impl Camera {
+    pub(crate) fn create_ray(&self, (w, h) : (f64, f64), (rx, ry) : (f64, f64)) -> Ray {
+        Ray {
+            origin : self.position,
+            direction : {
+                let tf = f64::tan(self.fov * 0.5);
+                let rpx = 2.0 * rx / w - 1.0;
+                let rpy = 2.0 * ry / h - 1.0;
+
+                // カメラ座標系での方向
+                let aspect = w / h;
+                let wd = Vec3::new((aspect * tf * rpx, tf * rpy, -1.0)).normalize();
+
+                // ワールド座標系に変換
+                self.ue * wd.x + self.ve * wd.y + self.we * wd.z
+            },
+        }
+    }
+}
+
 pub trait NewCamera<T> {
-    fn new(T, T, T, f64) -> Camera;
+    fn new(T, T, T, f64, (f64, f64)) -> Camera;
 }
 
 impl NewCamera<(f64, f64, f64)> for Camera {
@@ -35,7 +57,8 @@ impl NewCamera<(f64, f64, f64)> for Camera {
         position : (f64, f64, f64),
         focus : (f64, f64, f64),
         upside : (f64, f64, f64),
-        fov : f64) -> Camera {
+        fov : f64,
+        tm : (f64, f64)) -> Camera {
 
             let position = Vec3::new(position);
             let focus = Vec3::new(focus);
@@ -48,7 +71,7 @@ impl NewCamera<(f64, f64, f64)> for Camera {
             Camera{
                 position, focus, upside,
                 fov : fov * std::f64::consts::PI / 180.0,
-                we, ue, ve,
+                we, ue, ve, tm
             }
         }
 }
@@ -58,7 +81,8 @@ impl NewCamera<Vec3> for Camera {
         position : Vec3,
         focus : Vec3,
         upside : Vec3,
-        fov : f64) -> Camera {
+        fov : f64,
+        tm : (f64, f64)) -> Camera {
             let we = (position - focus).normalize();
             let ue = Vec3::cross(&upside, &we).normalize();
             let ve = Vec3::cross(&we, &ue);
@@ -66,7 +90,7 @@ impl NewCamera<Vec3> for Camera {
             Camera{
                 position, focus, upside,
                 fov : fov * std::f64::consts::PI / 180.0,
-                we, ue, ve,
+                we, ue, ve, tm
             }
         }
 }

@@ -6,6 +6,7 @@ use obj::*;
 use env::*;
 
 use std;
+use std::fmt;
 
 extern crate rand;
 use render::rand::random;
@@ -13,7 +14,23 @@ use render::rand::random;
 pub enum RenderMode {
     Shade,
     Normal,
-    // Depth,
+    NormalColor,
+    Depth,
+}
+
+impl fmt::Display for RenderMode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use render::RenderMode::*;
+        let n = match self {
+            Shade => "Shade",
+            Normal => "Normal",
+            NormalColor => "NormalColor",
+            Depth => "Depth",
+        };
+
+        write!(f, "{}", n)
+        
+    }
 }
 
 pub struct RenderSetting {
@@ -60,6 +77,7 @@ fn tonemap(v : Vec3) -> (u8, u8, u8) {
 pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBuildError> {
     
     let (w, h) = rs.window_size;
+
     let colors : Vec<_> = (0..w*h).into_par_iter()
         .map(|i| {
             let i : f64 = i as f64;
@@ -67,25 +85,13 @@ pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBu
             let (x, y) = (i % w, h - i / w);
 
             let c = &rs.camera;
+
+            let create_ray = |rx, ry| c.create_ray((w, h), (rx, ry));
             
             let v : Vec3 = match rs.mode {
                 RenderMode::Shade => {
                     (0..rs.spp).into_par_iter().map(|_|{
-                        let mut ray = Ray{
-                            origin : c.position,
-                            direction : {
-                                let tf = f64::tan(c.fov * 0.5);
-                                let rpx = 2.0 * (x + random::<f64>()) / w - 1.0;
-                                let rpy = 2.0 * (y + random::<f64>()) / h - 1.0;
-
-                                // カメラ座標系での方向
-                                let aspect = w / h;
-                                let wd = Vec3::new((aspect * tf * rpx, tf * rpy, -1.0)).normalize();
-
-                                // ワールド座標系に変換
-                                c.ue * wd.x + c.ve * wd.y + c.we * wd.z
-                            },
-                        };
+                        let mut ray = create_ray(x + random::<f64>(), y + random::<f64>());
 
                         let mut sum = Vec3::new(0.0);
                         let mut thp = Vec3::new(1.0);
@@ -125,34 +131,39 @@ pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBu
                     }).reduce(|| Vec3::new(0.0), |s, x| s + x)
                 },
                 RenderMode::Normal => {
-                    let ray = Ray {
-                        origin : c.position,
-                        direction : {
-                            let tf = f64::tan(c.fov * 0.5);
-                            let rpx = 2.0 * (x + random::<f64>()) / w - 1.0;
-                            let rpy = 2.0 * (y + random::<f64>()) / h - 1.0;
+                    let ray = create_ray(x, y);
 
-                            // カメラ座標系での方向
-                            let aspect = w / h;
-                            let wd = Vec3::new((aspect * tf * rpx, tf * rpy, -1.0)).normalize();
-
-                            // ワールド座標系に変換
-                            c.ue * wd.x + c.ve * wd.y + c.we * wd.z
-                        },
-                    };
-
-                    let h = rs.scene.hit(&ray, (0.1f64.powi(4), 10.0f64.powi(10)));
+                    let h = rs.scene.hit(&ray, c.tm);
                     if let Some(hr) = h {
                         hr.normal
                     } else {
                         Vec3::new(0.0)
                     }
                 },
+                RenderMode::NormalColor => {
+                    let ray = create_ray(x, y);
+
+                    let h = rs.scene.hit(&ray, c.tm);
+                    if let Some(hr) = h {
+                        hr.sphere.reflectance * hr.normal.dot(&&-ray.direction)
+                    } else {
+                        Vec3::new(0.0)
+                    }
+                },
+                RenderMode::Depth => {
+                    let ray = create_ray(x, y);
+
+                    let h = rs.scene.hit(&ray, c.tm);
+                    if let Some(hr) = h {
+                        Vec3::new(hr.t / 3000.0)
+                    } else {
+                        Vec3::new(0.0)
+                    }
+                }
             };
 
             tonemap(v)
         }).collect();
     
     Ok(colors)
-
 }
