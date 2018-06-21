@@ -16,7 +16,6 @@ pub(crate) struct HitRecord {
     pub(crate) material :Material,
 }
 
-
 pub(crate) trait Hit : Copy + Clone + Send + Sync {
     fn hit(&self, &Ray, (f64, f64)) -> Option<HitRecord>;
 }
