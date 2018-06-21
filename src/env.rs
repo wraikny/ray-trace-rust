@@ -122,19 +122,15 @@ impl Scene {
 
     pub(crate) fn hit(&self, ray : &Ray, tm : (f64, f64)) -> Option<(HitRecord)> {
         self.spheres.par_iter().map(|s : &Sphere| {
-            s.hit(ray, tm).map(|t| (s, t))
-        }).reduce(|| None, |m, v| {
-            match m {
-                Some((_, t0)) => match v {
-                    Some((_, t1)) => if t0 > t1 {v} else {m},
-                    None => m,
+            s.hit(ray, tm)
+        }).reduce(|| None, |hr1, hr2| {
+            match hr1 {
+                Some(hr1) => match hr2 {
+                    Some(hr2) => Some(if hr1.t < hr2.t {hr1} else {hr2}),
+                    None => Some(hr1),
                 },
-                None => v,
+                None => hr2,
             }
-        }).map(|(sphere, t)| {
-            let point = ray.origin + ray.direction * t;
-            let normal = (point - sphere.point) / sphere.radius;
-            HitRecord{t, point, normal, sphere : sphere.clone()}
         })
     }
 }

@@ -31,7 +31,6 @@ impl fmt::Display for RenderMode {
         };
 
         write!(f, "{}", n)
-        
     }
 }
 
@@ -54,20 +53,6 @@ impl Default for RenderSetting {
             scene : Default::default(),
             mode : RenderMode::Shade,
         }
-    }
-}
-
-struct TangentSpace(Vec3, Vec3);
-
-impl TangentSpace {
-    fn new(n : &Vec3) -> TangentSpace {
-        let s = n.z.signum();
-        let a = -1.0 / (s + n.z);
-        let b = n.x * n.y * a;
-        TangentSpace(
-            Vec3::new((1.0 + s * n.x * n.x * a, s * b, -s * n.x)), 
-            Vec3::new((b, s + n.y * n.y * a, -n.y))
-        )
     }
 }
 
@@ -102,17 +87,20 @@ pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBu
                             let h = rs.scene.hit(&ray, (0.1f64.powi(4), 10.0f64.powi(10)));
 
                             if let Some(hr) = h {
-                                sum = sum + thp * hr.sphere.le;
+                                sum = sum + thp * hr.le;
                                 ray = Ray {
                                     origin : hr.point,
-                                    direction : match hr.sphere.material {
+                                    direction : match hr.material {
                                         Material::Diffuse => {
                                             let n = if hr.normal.dot(&-ray.direction) > 0.0 {
                                                 hr.normal
                                             } else {
                                                 -hr.normal
                                             };
-                                            let TangentSpace(u, v) = TangentSpace::new(&n);
+                                            let (u, v) = {
+                                                let t = TangentSpace::new(&n);
+                                                (t.0, t.1)
+                                            };
                                             let d = {
                                                 let r = random::<f64>().sqrt();
                                                 let t : f64 = 2.0 * std::f64::consts::PI * random::<f64>();
@@ -174,7 +162,7 @@ pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBu
                                 };
                                 
                                 // Update throughput
-                                thp = thp * hr.sphere.reflectance;
+                                thp = thp * hr.reflectance;
                             }
                             
                             if thp.x.max(thp.y.max(thp.z)) == 0.0 {
@@ -199,7 +187,7 @@ pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBu
 
                     let h = rs.scene.hit(&ray, c.tm);
                     if let Some(hr) = h {
-                        hr.sphere.reflectance * hr.normal.dot(&&-ray.direction)
+                        hr.reflectance * hr.normal.dot(&&-ray.direction)
                     } else {
                         Vec3::new(0.0)
                     }
@@ -219,7 +207,7 @@ pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBu
 
                     let h = rs.scene.hit(&ray, c.tm);
                     if let Some(hr) = h {
-                        let r = hr.sphere.reflectance * hr.normal.dot(&&-ray.direction);
+                        let r = hr.reflectance * hr.normal.dot(&&-ray.direction);
                         r / r.x.max(r.y.max(r.z)) * (1.0 - hr.t / d)
                     } else {
                         Vec3::new(0.0)

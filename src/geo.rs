@@ -117,3 +117,17 @@ impl Div<f64> for Vec3 {
         }
     }
 }
+
+pub(crate) struct TangentSpace(pub(crate) Vec3, pub(crate) Vec3);
+
+impl TangentSpace {
+    pub(crate) fn new(n : &Vec3) -> TangentSpace {
+        let s = n.z.signum();
+        let a = -1.0 / (s + n.z);
+        let b = n.x * n.y * a;
+        TangentSpace(
+            Vec3::new((1.0 + s * n.x.powi(2) * a, s * b, -s * n.x)), 
+            Vec3::new((b, s + n.y.powi(2) * a, -n.y))
+        )
+    }
+}

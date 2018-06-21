@@ -7,14 +7,16 @@ pub(crate) struct Ray {
 
 #[derive(Copy, Clone)]
 pub(crate) struct HitRecord {
-    pub sphere : Sphere,
-    pub t : f64,
-    pub point : Vec3,
-    pub normal : Vec3,
+    pub(crate) t : f64,
+    pub(crate) point : Vec3,
+    pub(crate) normal : Vec3,
+    pub(crate) reflectance : Vec3,
+    pub(crate) le : Vec3,
+    pub(crate) material :Material,
 }
 
 pub(crate) trait Hit {
-    fn hit(&self, &Ray, (f64, f64)) -> Option<f64>;
+    fn hit(&self, &Ray, (f64, f64)) -> Option<HitRecord>;
 }
 
 pub mod fresnel {
@@ -41,19 +43,31 @@ pub struct Sphere {
 unsafe impl Send for Sphere {}
 
 impl Hit for Sphere {
-    fn hit(&self, ray : &Ray, (tmin, tmax) : (f64, f64)) -> Option<f64> {
+    fn hit(&self, ray : &Ray, (tmin, tmax) : (f64, f64)) -> Option<HitRecord> {
         let op = self.point - ray.origin;
         let b = op.dot(&ray.direction);
-        let det = b * b - op.dot(&op) + self.radius * self.radius;
+        let det = b.powi(2) - op.dot(&op) + self.radius.powi(2);
         if det >= 0.0 {
             let det_sqrt = det.sqrt();
             let t1 = b - det_sqrt;
             let t2 = b + det_sqrt;
 
+            let hr = |t| {
+                let point = ray.direction * t + ray.origin;
+                Some(HitRecord{
+                    t,
+                    point,
+                    normal : (point - self.point) / self.radius,
+                    reflectance : self.reflectance,
+                    le : self.le,
+                    material :self.material,
+                })
+            };
+
             if tmin < t1 && t1 < tmax {
-                Some(t1)
+                hr(t1)
             } else if tmin < t2 && t2 < tmax {
-                Some(t2)
+                hr(t2)
             } else {
                 None
             }

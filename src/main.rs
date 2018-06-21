@@ -91,8 +91,8 @@ fn main() -> Result<(), MyError> {
     */
 
     let rs = render::RenderSetting {
-        spp : 5000,
-        reflect_n : 20,
+        spp : 100,
+        reflect_n : 10,
         .. Default::default()
     };
     
