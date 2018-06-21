@@ -96,7 +96,8 @@ impl NewCamera<Vec3> for Camera {
 }
 
 pub struct Scene {
-    pub spheres : Vec<Sphere>
+    pub spheres : Vec<Sphere>,
+    pub planes : Vec<Plane>
 }
 
 impl Default for Scene {
@@ -111,17 +112,19 @@ impl Default for Scene {
             Sphere{point : Vec3::new((27.0     , 16.5        , 47.0)), radius : 16.5, material : Material::Mirror , reflectance : Vec3::new(0.999)                , le : Vec3::new(0.0) }, // left ball
             Sphere{point : Vec3::new((73.0     , 16.5        , 78.0)), radius : 16.5, material : Material::Fresnel(fresnel::GLASSBK7) , reflectance : Vec3::new(0.999)                , le : Vec3::new(0.0) }, // right ball
             Sphere{point : Vec3::new((50.0     , 681.6 - 0.27, 81.6)), radius : 600., material : Material::Diffuse, reflectance : Vec3::new(0.0)                  , le : Vec3::new(12.0)}, // ceiling holl
-        ])
+        ],
+        Vec::new())
     }
 }
 
 impl Scene {
-    pub fn new(spheres : Vec<Sphere>) -> Scene {
-        Scene{spheres}
+    pub fn new(spheres : Vec<Sphere>, planes : Vec<Plane>) -> Scene {
+        Scene{spheres, planes}
     }
 
     pub(crate) fn hit(&self, ray : &Ray, tm : (f64, f64)) -> Option<(HitRecord)> {
-        self.spheres.par_iter().map(|s : &Sphere| {
+
+        let hit = self.spheres.par_iter().map(|s : &Sphere| {
             s.hit(ray, tm)
         }).reduce(|| None, |hr1, hr2| {
             match hr1 {
@@ -131,6 +134,21 @@ impl Scene {
                 },
                 None => hr2,
             }
-        })
+        });
+
+        let hit = self.planes.par_iter().map(|o : &Plane| {
+            o.hit(ray, tm)
+        }).reduce(|| hit, |hr1, hr2| {
+            match hr1 {
+                Some(hr1) => match hr2 {
+                    Some(hr2) => Some(if hr1.t < hr2.t {hr1} else {hr2}),
+                    None => Some(hr1),
+                },
+                None => hr2,
+            }
+        });
+
+        hit
+
     }
 }
