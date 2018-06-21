@@ -1,5 +1,6 @@
 use geo::*;
 
+#[derive(Copy, Clone)]
 pub(crate) struct Ray {
     pub origin : Vec3,
     pub direction: Vec3,
@@ -15,7 +16,7 @@ pub(crate) struct HitRecord {
     pub(crate) material :Material,
 }
 
-pub(crate) trait Hit {
+pub(crate) trait Hit : Copy + Clone + Send + Sync {
     fn hit(&self, &Ray, (f64, f64)) -> Option<HitRecord>;
 }
 

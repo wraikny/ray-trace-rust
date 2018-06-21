@@ -117,38 +117,30 @@ impl Default for Scene {
     }
 }
 
+fn compare_hitrecord(hr1 : Option<HitRecord>, hr2 : Option<HitRecord>) -> Option<HitRecord> {
+    match hr1 {
+        Some(hr1) => match hr2 {
+            Some(hr2) => Some(if hr1.t < hr2.t {hr1} else {hr2}),
+            None => Some(hr1),
+        },
+        None => hr2,
+    }
+}
+
+fn calc_hit<T : Hit>(v : &Vec<T>, ray : &Ray, tm : (f64, f64)) -> Option<HitRecord> {
+    v.par_iter().map(|h| h.hit(ray, tm))
+    .reduce(|| None, compare_hitrecord)
+}
+
 impl Scene {
     pub fn new(spheres : Vec<Sphere>, planes : Vec<Plane>) -> Scene {
         Scene{spheres, planes}
     }
 
     pub(crate) fn hit(&self, ray : &Ray, tm : (f64, f64)) -> Option<(HitRecord)> {
-
-        let hit = self.spheres.par_iter().map(|s : &Sphere| {
-            s.hit(ray, tm)
-        }).reduce(|| None, |hr1, hr2| {
-            match hr1 {
-                Some(hr1) => match hr2 {
-                    Some(hr2) => Some(if hr1.t < hr2.t {hr1} else {hr2}),
-                    None => Some(hr1),
-                },
-                None => hr2,
-            }
-        });
-
-        let hit = self.planes.par_iter().map(|o : &Plane| {
-            o.hit(ray, tm)
-        }).reduce(|| hit, |hr1, hr2| {
-            match hr1 {
-                Some(hr1) => match hr2 {
-                    Some(hr2) => Some(if hr1.t < hr2.t {hr1} else {hr2}),
-                    None => Some(hr1),
-                },
-                None => hr2,
-            }
-        });
-
-        hit
-
+        vec![
+            calc_hit(&self.spheres, ray, tm),
+            calc_hit(&self.planes, ray, tm)
+        ].into_par_iter().reduce(|| None, compare_hitrecord)
     }
 }
