@@ -94,12 +94,13 @@ impl Hit for Plane {
         let nd = self.normal.dot(&ray.direction);
 
         if nd != 0.0 {
-            let t = self.normal.dot(&self.point) / nd;
+            // normal * (t * ray.direction + ray.origin - point) == 0
+            let t = self.normal.dot(&(self.point - ray.origin)) / nd;
             if tmin < t && t < tmax {
                 return Some(HitRecord {
-                    t,
-                    point : ray.direction * t,
-                    normal : self.normal,
+                    t : t,
+                    point : ray.direction * t + ray.origin,
+                    normal : self.normal.normalize(),
                     reflectance : self.reflectance,
                     le : self.le,
                     material : self.material,
@@ -135,13 +136,14 @@ impl Polygon {
 
 impl Hit for Polygon {
     fn hit(&self, ray : &Ray, (tmin, tmax) : (f64, f64)) -> Option<HitRecord> {
-        if let Some(normal) = self.normal() {
+        if let Some(normal) = self.normal().map(Vec3::normalize) {
             let nd = normal.dot(&ray.direction);
             if nd != 0.0 {
                 let [a, b, c] = self.points;
-                let t = normal.dot(&a) / nd;
+                // normal * (t * ray.direction + ray.origin - a) == 0
+                let t = normal.dot(&(a - ray.origin)) / nd;
                 if tmin < t && t < tmax {
-                    let point = ray.direction * t;
+                    let point = ray.direction * t + ray.origin;
 
                     let ap = (a - c).cross(&(point - a)).normalize();
                     let bp = (b - a).cross(&(point - b)).normalize();

@@ -54,6 +54,7 @@ impl std::fmt::Debug for MyError {
 }
 
 fn main() -> Result<(), MyError> {
+    
     /*
     let rs = render::RenderSetting {
         spp : 5000,
@@ -91,18 +92,18 @@ fn main() -> Result<(), MyError> {
     };
     
     */
+    
     let rs = render::RenderSetting {
-        spp : 3000,
-        reflect_n : 20,
+        spp : 1000,
+        reflect_n : 10,
+        mode : render::RenderMode::DepthNormalColor(500.0),
         .. Default::default()
     };
-    
-    
 
     println!("render::run");
     let cs = measure!(render::run(&rs))?;
 
-    let n = 1;
+    let n = "test";
     
     let f = match &rs.mode {
         render::RenderMode::Shade => {
@@ -120,7 +121,7 @@ fn main() -> Result<(), MyError> {
 
     use std::process::Command;
 
-    if false {
+    if true {
         let mut p = Command::new("imgcat").arg(&f_ppm).spawn()?;
         println!("imgcat {}", &f_ppm);
         measure!(p.wait())?;

@@ -103,19 +103,20 @@ pub struct Scene {
 
 impl Default for Scene {
     fn default() -> Scene {
-        let k = 10.0f64.powi(5);
         Scene::new(
             vec![
-                Sphere{point : Vec3::new((k + 1.0  , 40.8        , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new((0.75, 0.25, 0.25))   , le : Vec3::new(0.0) }, // left wall
-                Sphere{point : Vec3::new((-k + 99.0, 40.8        , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new((0.25, 0.25, 0.75))   , le : Vec3::new(0.0) }, // right wall
-                Sphere{point : Vec3::new((50.0     , 40.8        , k   )), radius : k   , material : Material::Diffuse, reflectance : Vec3::new(0.75)                 , le : Vec3::new(0.0) }, // far side wall
-                Sphere{point : Vec3::new((50.0     , k           , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new(0.75)                 , le : Vec3::new(0.0) }, // floor
-                Sphere{point : Vec3::new((50.0     , -k + 81.6   , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new(0.75)                 , le : Vec3::new(0.0) }, // ceilling
-                Sphere{point : Vec3::new((27.0     , 16.5        , 47.0)), radius : 16.5, material : Material::Mirror , reflectance : Vec3::new(0.999)                , le : Vec3::new(0.0) }, // left ball
-                Sphere{point : Vec3::new((73.0     , 16.5        , 78.0)), radius : 16.5, material : Material::Fresnel(fresnel::GLASSBK7) , reflectance : Vec3::new(0.999)                , le : Vec3::new(0.0) }, // right ball
-                Sphere{point : Vec3::new((50.0     , 681.6 - 0.27, 81.6)), radius : 600., material : Material::Diffuse, reflectance : Vec3::new(0.0)                  , le : Vec3::new(12.0)}, // ceiling holl
+                Sphere{point : Vec3::new((27.0, 16.5, 47.0)), radius : 16.5, material : Material::Mirror , reflectance : Vec3::new(0.999), le : Vec3::new(0.0)}, // left ball
+                Sphere{point : Vec3::new((73.0, 16.5, 78.0)), radius : 16.5, material : Material::Fresnel(fresnel::GLASSBK7) , reflectance : Vec3::new(0.999), le : Vec3::new(0.0)}, // right ball
+                Sphere{point : Vec3::new((50.0, 681.6 - 0.27, 81.6)), radius : 600., material : Material::Diffuse, reflectance : Vec3::new(0.0), le : Vec3::new(12.0)}, // ceiling holl
             ],
-            Vec::new(),
+            vec![
+                Plane{normal : Vec3::new((0.0, 0.0, 1.0)), point : Vec3::new((0.0, 0.0, 0.0)), material : Material::Diffuse, reflectance : Vec3::new(0.75), le : Vec3::new(0.0)}, // far side wall
+                Plane{normal : Vec3::new((1.0, 0.0, 0.0)), point : Vec3::new((1.0, 0.0, 0.0)), material : Material::Diffuse, reflectance : Vec3::new((0.75, 0.25, 0.25)), le : Vec3::new(0.0)}, // left wall
+                Plane{normal : Vec3::new((-1.0, 0.0, 0.0)), point : Vec3::new((99.0, 0.0, 0.0)), material : Material::Diffuse, reflectance : Vec3::new((0.25, 0.25, 0.75)), le : Vec3::new(0.0)}, // right wall
+                Plane{normal : Vec3::new((0.0, 1.0, 0.0)), point : Vec3::new((0.0, 0.0, 0.0)), material : Material::Diffuse, reflectance : Vec3::new(0.75), le : Vec3::new(0.0)}, // floor
+                Plane{normal : Vec3::new((0.0, -1.0, 0.0)), point : Vec3::new((0.0, 81.6, 0.0)), material : Material::Diffuse, reflectance : Vec3::new(0.75), le : Vec3::new(0.0)}, // ceilling
+                
+            ],
             Vec::new()
         )
     }
@@ -123,10 +124,10 @@ impl Default for Scene {
 
 fn compare_hitrecord(hr1 : Option<HitRecord>, hr2 : Option<HitRecord>) -> Option<HitRecord> {
     match hr1 {
-        Some(hr1) => match hr2 {
-            Some(hr2) => Some(if hr1.t < hr2.t {hr1} else {hr2}),
-            None => Some(hr1),
-        },
+        Some(hr1) => Some(match hr2 {
+            Some(hr2) => if hr1.t < hr2.t {hr1} else {hr2},
+            None => hr1,
+        }),
         None => hr2,
     }
 }
@@ -145,7 +146,7 @@ impl Scene {
         vec![
             calc_hit(&self.spheres, ray, tm),
             calc_hit(&self.planes, ray, tm),
-            calc_hit(&self.polygons, ray, tm)
+            calc_hit(&self.polygons, ray, tm),
         ].into_par_iter().reduce(|| None, compare_hitrecord)
     }
 }
