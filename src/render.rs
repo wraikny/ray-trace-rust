@@ -119,9 +119,9 @@ pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBu
                                         };
                                         u * d.x + v * d.y + n * d.z
                                     },
-                                    Material::Mirror => {
-                                            reflect_mirror()
-                                    },
+
+                                    Material::Mirror => reflect_mirror(),
+                                    
                                     Material::Fresnel(ior) => {
                                         let wi = -ray.direction;
                                         let into = wi.dot(&hr.normal) > 0.0;
@@ -152,7 +152,7 @@ pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBu
                                                     wt.dot(&hr.normal)
                                                 };
                                                 let r = (1.0 - ior) / (1.0 + ior);
-                                                r * r + (1.0 - r.powi(2)) * (1.0 - cos).powi(5)
+                                                r.powi(2) + (1.0 - r.powi(2)) * (1.0 - cos).powi(5)
                                             };
                                             // Select reflection or refraction
                                             // according to the fresnel term
