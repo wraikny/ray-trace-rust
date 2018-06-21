@@ -54,19 +54,17 @@ impl std::fmt::Debug for MyError {
 }
 
 fn main() -> Result<(), MyError> {
-    
-    
     let rs = render::RenderSetting {
-        spp : 3000,
-        reflect_n : 30,
+        spp : 5000,
+        reflect_n : 50,
         scene : {
             use raytrace::env::*;
             use raytrace::obj::*;
             use raytrace::geo::*;
             let k = 10.0f64.powi(5);
             Scene::new(vec![
+                Sphere{point : Vec3::new((k + 1.0  , 40.8        , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new((0.75, 0.25, 0.25))   , le : Vec3::new(0.0) }, // left wall
                 Sphere{point : Vec3::new((-k + 99.0, 40.8        , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new((0.25, 0.25, 0.75))   , le : Vec3::new(0.0)}, // right wall
-
                 Sphere{point : Vec3::new((50.0     , 40.8        , k   )), radius : k   , material : Material::Mirror, reflectance : Vec3::new(0.75)  , le : Vec3::new(0.0)}, // far side wall
 
                 Sphere{point : Vec3::new((50.0     , k           , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new(0.75)  , le : Vec3::new(0.0)}, // floor
@@ -84,7 +82,7 @@ fn main() -> Result<(), MyError> {
             Vec::new())
         },
         camera : Default::default(),
-        mode : render::RenderMode::NormalColor,
+        mode : render::RenderMode::Shade,
         ..Default::default()
     };
     
@@ -115,17 +113,18 @@ fn main() -> Result<(), MyError> {
     let f_ppm = format!("img/ppm/{}.ppm", &f);
     let f_png = format!("img/png/{}.png", &f);
 
-    if true {
-        use std::process::Command;
-        let mut p1 = Command::new("imgcat").arg(&f_ppm).spawn()?;
-        let mut p2 = Command::new("convert").arg(&f_ppm).arg(&f_png).spawn()?;
-        
+    use std::process::Command;
+
+    if false {
+        let mut p = Command::new("imgcat").arg(&f_ppm).spawn()?;
         println!("imgcat {}", &f_ppm);
-        measure!(p1.wait())?;
-        
-        println!("convert {} {}", &f_ppm, &f_png);
-        measure!(p2.wait())?;
+        measure!(p.wait())?;
     }
+
+    
+    let mut p = Command::new("convert").arg(&f_ppm).arg(&f_png).spawn()?;
+    println!("convert {} {}", &f_ppm, &f_png);
+    measure!(p.wait())?;
 
     Ok(())
 }
