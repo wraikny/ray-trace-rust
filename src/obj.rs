@@ -163,6 +163,8 @@ impl Hit for Polygon {
                     } else {
                         None
                     }
+                } else {
+                    None
                 }
             } else {
                 None
@@ -170,38 +172,5 @@ impl Hit for Polygon {
         } else {
             None
         }
-
-        /*
-        let op = self.point - ray.origin;
-        let b = op.dot(&ray.direction);
-        let det = b.powi(2) - op.dot(&op) + self.radius.powi(2);
-        if det >= 0.0 {
-            let det_sqrt = det.sqrt();
-            let t1 = b - det_sqrt;
-            let t2 = b + det_sqrt;
-
-            let hr = |t| {
-                let point = ray.direction * t + ray.origin;
-                Some(HitRecord{
-                    t,
-                    point,
-                    normal : (point - self.point) / self.radius,
-                    reflectance : self.reflectance,
-                    le : self.le,
-                    material :self.material,
-                })
-            };
-
-            if tmin < t1 && t1 < tmax {
-                hr(t1)
-            } else if tmin < t2 && t2 < tmax {
-                hr(t2)
-            } else {
-                None
-            }
-        } else {
-            None
-        }
-        */
     }
 }
