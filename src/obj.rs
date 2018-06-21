@@ -65,14 +65,16 @@ impl Hit for Sphere {
                 })
             };
 
-            return if tmin < t1 && t1 < tmax {
+            if tmin < t1 && t1 < tmax {
                 hr(t1)
             } else if tmin < t2 && t2 < tmax {
                 hr(t2)
-            };
+            } else {
+                None
+            }
+        } else {
+            None
         }
-        
-        None
     }
 }
 
