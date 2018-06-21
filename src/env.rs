@@ -103,14 +103,14 @@ impl Default for Scene {
     fn default() -> Scene {
         let k = 10.0f64.powi(5);
         Scene::new(vec![
-            Sphere{point : Vec3::new((k + 1.0  , 40.8        , 81.6)), radius : k   , reflectance : Vec3::new((0.75, 0.25, 0.25))   , ..Default::default()}, // left wall
-            Sphere{point : Vec3::new((-k + 99.0, 40.8        , 81.6)), radius : k   , reflectance : Vec3::new((0.25, 0.25, 0.75))   , ..Default::default()}, // right wall
-            Sphere{point : Vec3::new((50.0     , 40.8        , k   )), radius : k   , reflectance : Vec3::new(0.75)                 , ..Default::default()}, // far side wall
-            Sphere{point : Vec3::new((50.0     , k           , 81.6)), radius : k   , reflectance : Vec3::new(0.75)                 , ..Default::default()}, // floor
-            Sphere{point : Vec3::new((50.0     , -k + 81.6   , 81.6)), radius : k   , reflectance : Vec3::new(0.75)                 , ..Default::default()}, // ceilling
-            Sphere{point : Vec3::new((27.0     , 16.5        , 47.0)), radius : 16.5, reflectance : Vec3::new(0.999)                , ..Default::default()}, // left ball
-            Sphere{point : Vec3::new((73.0     , 16.5        , 78.0)), radius : 16.5, reflectance : Vec3::new(0.999)                , ..Default::default()}, // right ball
-            Sphere{point : Vec3::new((50.0     , 681.6 - 0.27, 81.6)), radius : 600., reflectance : Vec3::new(0.0)                  , le : Vec3::new(12.0)}, // ceiling holl
+            Sphere{point : Vec3::new((k + 1.0  , 40.8        , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new((0.75, 0.25, 0.25))   , le : Vec3::new(0.0) }, // left wall
+            Sphere{point : Vec3::new((-k + 99.0, 40.8        , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new((0.25, 0.25, 0.75))   , le : Vec3::new(0.0) }, // right wall
+            Sphere{point : Vec3::new((50.0     , 40.8        , k   )), radius : k   , material : Material::Diffuse, reflectance : Vec3::new(0.75)                 , le : Vec3::new(0.0) }, // far side wall
+            Sphere{point : Vec3::new((50.0     , k           , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new(0.75)                 , le : Vec3::new(0.0) }, // floor
+            Sphere{point : Vec3::new((50.0     , -k + 81.6   , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new(0.75)                 , le : Vec3::new(0.0) }, // ceilling
+            Sphere{point : Vec3::new((27.0     , 16.5        , 47.0)), radius : 16.5, material : Material::Mirror , reflectance : Vec3::new(0.999)                , le : Vec3::new(0.0) }, // left ball
+            Sphere{point : Vec3::new((73.0     , 16.5        , 78.0)), radius : 16.5, material : Material::Fresnel(fresnel::GLASSBK7) , reflectance : Vec3::new(0.999)                , le : Vec3::new(0.0) }, // right ball
+            Sphere{point : Vec3::new((50.0     , 681.6 - 0.27, 81.6)), radius : 600., material : Material::Diffuse, reflectance : Vec3::new(0.0)                  , le : Vec3::new(12.0)}, // ceiling holl
         ])
     }
 }

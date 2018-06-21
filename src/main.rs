@@ -17,7 +17,6 @@ macro_rules! measure {
   };
 }
 
-
 enum MyError {
     Run(rayon::ThreadPoolBuildError),
     WriteImage(io::WriteImageError),
@@ -56,6 +55,7 @@ impl std::fmt::Debug for MyError {
 
 fn main() -> Result<(), MyError> {
     
+    /*
     let rs = render::RenderSetting {
         spp : 3000,
         reflect_n : 20,
@@ -84,19 +84,29 @@ fn main() -> Result<(), MyError> {
                 Sphere{point : Vec3::new((50.0     , 681.6 - 0.27, 81.6)), radius : 600., reflectance : Vec3::new(0.0)   , le : Vec3::new(6.0)}, // ceiling holl
             ])
         },
+        camera : Default::default(),
         mode : render::RenderMode::NormalColor,
         ..Default::default()
+    };
+    */
+
+    let rs = render::RenderSetting {
+        spp : 5000,
+        reflect_n : 20,
+        .. Default::default()
     };
     
     println!("render::run");
     let cs = measure!(render::run(&rs))?;
+
+    let n = 3;
     
     let f = match &rs.mode {
         render::RenderMode::Shade => {
-            format!("result-{}-{}", &rs.spp, &rs.reflect_n)
+            format!("result{}-{}-{}", n, &rs.spp, &rs.reflect_n)
         },
         _ => {
-            format!("result-{}", &rs.mode)
+            format!("result{}-{}", n, &rs.mode)
         }
     };
 

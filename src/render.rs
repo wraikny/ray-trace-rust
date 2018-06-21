@@ -105,23 +105,75 @@ pub fn run(rs : &RenderSetting) -> Result<Vec<(u8, u8, u8)>, rayon::ThreadPoolBu
                                 sum = sum + thp * hr.sphere.le;
                                 ray = Ray {
                                     origin : hr.point,
-                                    direction : {
-                                        let n = if hr.normal.dot(&-ray.direction) > 0.0 {
-                                            hr.normal
-                                        } else {
-                                            -hr.normal
-                                        };
-                                        let TangentSpace(u, v) = TangentSpace::new(&n);
-                                        let d = {
-                                            let r = random::<f64>().sqrt();
-                                            let t : f64 = 2.0 * std::f64::consts::PI * random::<f64>();
-                                            let (x, y) = (r * t.cos(), r * t.sin());
-                                            Vec3{x, y, z : 0.0f64.max(1.0 - (x * x + y * y))}
-                                        };
-                                        u * d.x + v * d.y + n * d.z
+                                    direction : match hr.sphere.material {
+                                        Material::Diffuse => {
+                                            let n = if hr.normal.dot(&-ray.direction) > 0.0 {
+                                                hr.normal
+                                            } else {
+                                                -hr.normal
+                                            };
+                                            let TangentSpace(u, v) = TangentSpace::new(&n);
+                                            let d = {
+                                                let r = random::<f64>().sqrt();
+                                                let t : f64 = 2.0 * std::f64::consts::PI * random::<f64>();
+                                                let (x, y) = (r * t.cos(), r * t.sin());
+                                                Vec3{x, y, z : 0.0f64.max(1.0 - (x * x + y * y))}
+                                            };
+                                            u * d.x + v * d.y + n * d.z
+                                        },
+                                        Material::Mirror => {
+                                                let wi = -ray.direction;
+                                                hr.normal * 2.0 * wi.dot(&hr.normal) - wi
+                                        },
+                                        Material::Fresnel(ior) => {
+                                            let wi = -ray.direction;
+                                            let into = wi.dot(&hr.normal) > 0.0;
+                                            let n = hr.normal * if into {1.0} else {-1.0};
+                                            let eta = if into {
+                                                1.0 / ior
+                                            } else {
+                                                ior
+                                            };
+
+                                            let wt = {
+                                                // Snell's law (vector form)
+                                                let t = wi.dot(&n);
+                                                let t2 = 1.0 - eta * eta * (1.0 - t * t);
+                                                if t2 < 0.0 {
+                                                    None
+                                                } else {
+                                                    Some((n * t - wi) * eta - n * t2.sqrt())
+                                                }
+                                            };
+
+                                            if let Some(wt) = wt {
+                                                // Schlick's approximation
+                                                let fr = {
+                                                    let cos = if into {
+                                                        wi.dot(&hr.normal)
+                                                    } else {
+                                                        wt.dot(&hr.normal)
+                                                    };
+                                                    let r = (1.0 - ior) / (1.0 + ior);
+                                                    r * r + (1.0 - r * r) * (1.0 - cos).powi(5)
+                                                };
+                                                // Select reflection or refraction
+                                                // according to the fresnel term
+
+                                                if random::<f64>() < fr {
+                                                    hr.normal * 2.0 * wi.dot(&hr.normal) - wi
+                                                } else {
+                                                    wt
+                                                }
+                                            } else {
+                                                // Total internal reflection
+                                                hr.normal * 2.0 * wi.dot(&hr.normal) - wi
+                                            }
+                                        }
                                     }
                                 };
                                 
+                                // Update throughput
                                 thp = thp * hr.sphere.reflectance;
                             }
                             

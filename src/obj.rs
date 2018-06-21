@@ -17,10 +17,23 @@ pub(crate) trait Hit {
     fn hit(&self, &Ray, (f64, f64)) -> Option<f64>;
 }
 
-#[derive(Copy, Clone, Default)]
+pub mod fresnel {
+    pub const VACCUM : f64 = 1.0;
+    pub const GLASSBK7 : f64 = 1.5168;
+}
+
+#[derive(Copy, Clone)]
+pub enum Material {
+    Diffuse,
+    Mirror,
+    Fresnel(f64),
+}
+
+#[derive(Copy, Clone)]
 pub struct Sphere {
     pub point : Vec3,
     pub radius : f64,
+    pub material : Material,
     pub reflectance : Vec3,
     pub le : Vec3,
 }
