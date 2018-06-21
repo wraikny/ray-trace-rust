@@ -16,6 +16,7 @@ pub(crate) struct HitRecord {
     pub(crate) material :Material,
 }
 
+
 pub(crate) trait Hit : Copy + Clone + Send + Sync {
     fn hit(&self, &Ray, (f64, f64)) -> Option<HitRecord>;
 }
@@ -65,17 +66,14 @@ impl Hit for Sphere {
                 })
             };
 
-            if tmin < t1 && t1 < tmax {
+            return if tmin < t1 && t1 < tmax {
                 hr(t1)
             } else if tmin < t2 && t2 < tmax {
                 hr(t2)
-            } else {
-                None
-            }
-        } else {
-            None
+            };
         }
         
+        None
     }
 }
 
@@ -87,7 +85,6 @@ pub struct Plane {
     pub reflectance : Vec3,
     pub le : Vec3,
 }
-// normal.dot(Vec3{x, y, z} - point) == 0.0
 
 unsafe impl Send for Plane {}
 
@@ -98,20 +95,18 @@ impl Hit for Plane {
         if nd != 0.0 {
             let t = self.normal.dot(&self.point) / nd;
             if tmin < t && t < tmax {
-                Some(HitRecord {
+                return Some(HitRecord {
                     t,
                     point : ray.direction * t,
                     normal : self.normal,
                     reflectance : self.reflectance,
                     le : self.le,
                     material : self.material,
-                })
-            } else {
-                None
+                });
             }
-        } else {
-            None
         }
+
+        None
     }
 }
 
@@ -152,25 +147,19 @@ impl Hit for Polygon {
                     let cp = (c - b).cross(&(point - c)).normalize();
                     
                     if ap == bp && ap == cp {
-                        Some(HitRecord {
+                        return Some(HitRecord {
                             t,
                             point,
                             normal,
                             reflectance : self.reflectance,
                             le : self.le,
                             material : self.material,
-                        })
-                    } else {
-                        None
+                        });
                     }
-                } else {
-                    None
                 }
-            } else {
-                None
             }
-        } else {
-            None
         }
+
+        None
     }
 }
