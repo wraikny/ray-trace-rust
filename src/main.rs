@@ -88,16 +88,17 @@ fn main() -> Result<(), MyError> {
     
     /*
     let rs = render::RenderSetting {
-        spp : 100,
-        reflect_n : 10,
+        spp : 3000,
+        reflect_n : 20,
         .. Default::default()
     };
     */
+    
 
     println!("render::run");
     let cs = measure!(render::run(&rs))?;
 
-    let n = 3;
+    let n = 1;
     
     let f = match &rs.mode {
         render::RenderMode::Shade => {
