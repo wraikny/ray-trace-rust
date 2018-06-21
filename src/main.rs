@@ -54,6 +54,7 @@ impl std::fmt::Debug for MyError {
 }
 
 fn main() -> Result<(), MyError> {
+    /*
     let rs = render::RenderSetting {
         spp : 5000,
         reflect_n : 50,
@@ -85,17 +86,17 @@ fn main() -> Result<(), MyError> {
             )
         },
         camera : Default::default(),
-        mode : render::RenderMode::Shade,
+        mode : render::RenderMode::NormalColor,
         ..Default::default()
     };
     
-    /*
+    */
     let rs = render::RenderSetting {
         spp : 3000,
         reflect_n : 20,
         .. Default::default()
     };
-    */
+    
     
 
     println!("render::run");
