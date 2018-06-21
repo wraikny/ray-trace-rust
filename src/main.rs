@@ -62,24 +62,27 @@ fn main() -> Result<(), MyError> {
             use raytrace::obj::*;
             use raytrace::geo::*;
             let k = 10.0f64.powi(5);
-            Scene::new(vec![
-                Sphere{point : Vec3::new((k + 1.0  , 40.8        , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new((0.75, 0.25, 0.25))   , le : Vec3::new(0.0) }, // left wall
-                Sphere{point : Vec3::new((-k + 99.0, 40.8        , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new((0.25, 0.25, 0.75))   , le : Vec3::new(0.0)}, // right wall
-                Sphere{point : Vec3::new((50.0     , 40.8        , k   )), radius : k   , material : Material::Mirror, reflectance : Vec3::new(0.75)  , le : Vec3::new(0.0)}, // far side wall
+            Scene::new(
+                vec![
+                    Sphere{point : Vec3::new((k + 1.0  , 40.8        , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new((0.75, 0.25, 0.25))   , le : Vec3::new(0.0) }, // left wall
+                    Sphere{point : Vec3::new((-k + 99.0, 40.8        , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new((0.25, 0.25, 0.75))   , le : Vec3::new(0.0)}, // right wall
+                    Sphere{point : Vec3::new((50.0     , 40.8        , k   )), radius : k   , material : Material::Mirror, reflectance : Vec3::new(0.75)  , le : Vec3::new(0.0)}, // far side wall
 
-                Sphere{point : Vec3::new((50.0     , k           , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new(0.75)  , le : Vec3::new(0.0)}, // floor
-                Sphere{point : Vec3::new((50.0     , -k + 81.6   , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new(0.75)  , le : Vec3::new(0.0)}, // ceilling
+                    Sphere{point : Vec3::new((50.0     , k           , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new(0.75)  , le : Vec3::new(0.0)}, // floor
+                    Sphere{point : Vec3::new((50.0     , -k + 81.6   , 81.6)), radius : k   , material : Material::Diffuse, reflectance : Vec3::new(0.75)  , le : Vec3::new(0.0)}, // ceilling
 
-                Sphere{point : Vec3::new((27.0, 56.5, 47.0)), radius :  6.5, material : Material::Fresnel(fresnel::GLASSBK7), reflectance : Vec3::new((0.15, 1.0, 0.15)), le : Vec3::new(0.0)},
-                Sphere{point : Vec3::new((83.0, 46.5, 98.0)), radius :  8.5, material : Material::Diffuse, reflectance : Vec3::new(0.999), le : Vec3::new((0.5, 1.0, 0.5))},
-                Sphere{point : Vec3::new((23.0, 46.5, 98.0)), radius :  5.5, material : Material::Diffuse, reflectance : Vec3::new(0.999), le : Vec3::new(0.0)},
-                Sphere{point : Vec3::new((27.0,  0.0, 98.0)), radius : 14.5, material : Material::Fresnel(fresnel::GLASSBK7), reflectance : Vec3::new((0.25, 0.25, 0.75)), le : Vec3::new(0.0)},
-                Sphere{point : Vec3::new((27.0, 26.0, 98.0)), radius :  8.5, material : Material::Mirror, reflectance : Vec3::new(0.999), le : Vec3::new(0.0)},
-                Sphere{point : Vec3::new((73.0, 16.5, 78.0)), radius : 16.5, material : Material::Diffuse, reflectance : Vec3::new(0.999), le : Vec3::new(0.0)},
+                    Sphere{point : Vec3::new((27.0, 56.5, 47.0)), radius :  6.5, material : Material::Fresnel(fresnel::GLASSBK7), reflectance : Vec3::new((0.15, 1.0, 0.15)), le : Vec3::new(0.0)},
+                    Sphere{point : Vec3::new((83.0, 46.5, 98.0)), radius :  8.5, material : Material::Diffuse, reflectance : Vec3::new(0.999), le : Vec3::new((0.5, 1.0, 0.5))},
+                    Sphere{point : Vec3::new((23.0, 46.5, 98.0)), radius :  5.5, material : Material::Diffuse, reflectance : Vec3::new(0.999), le : Vec3::new(0.0)},
+                    Sphere{point : Vec3::new((27.0,  0.0, 98.0)), radius : 14.5, material : Material::Fresnel(fresnel::GLASSBK7), reflectance : Vec3::new((0.25, 0.25, 0.75)), le : Vec3::new(0.0)},
+                    Sphere{point : Vec3::new((27.0, 26.0, 98.0)), radius :  8.5, material : Material::Mirror, reflectance : Vec3::new(0.999), le : Vec3::new(0.0)},
+                    Sphere{point : Vec3::new((73.0, 16.5, 78.0)), radius : 16.5, material : Material::Diffuse, reflectance : Vec3::new(0.999), le : Vec3::new(0.0)},
 
-                Sphere{point : Vec3::new((50.0     , 681.6 - 0.27, 81.6)), radius : 600., material : Material::Diffuse, reflectance : Vec3::new(0.0)   , le : Vec3::new(3.0)}, // ceiling holl
-            ],
-            Vec::new())
+                    Sphere{point : Vec3::new((50.0     , 681.6 - 0.27, 81.6)), radius : 600., material : Material::Diffuse, reflectance : Vec3::new(0.0)   , le : Vec3::new(3.0)}, // ceiling holl
+                ],
+                Vec::new(),
+                Vec::new()
+            )
         },
         camera : Default::default(),
         mode : render::RenderMode::Shade,

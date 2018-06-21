@@ -1,3 +1,4 @@
+use std;
 use std::ops::{Neg, Add, Sub, Mul, Div};
 
 #[derive(Copy, Clone, Default)]
@@ -115,6 +116,14 @@ impl Div<f64> for Vec3 {
             y : self.y / other,
             z : self.z / other,
         }
+    }
+}
+
+impl std::cmp::PartialEq for Vec3 {
+    fn eq(&self, other : &Vec3) -> bool {
+        self.x == other.x &&
+        self.y == other.y &&
+        self.z == other.z
     }
 }
 

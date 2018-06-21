@@ -80,18 +80,97 @@ impl Hit for Sphere {
 }
 
 #[derive(Copy, Clone)]
-pub struct Triangle {
+pub struct Plane {
+    pub normal : Vec3,
+    pub point : Vec3,
+    pub material : Material,
+    pub reflectance : Vec3,
+    pub le : Vec3,
+}
+// normal.dot(Vec3{x, y, z} - point) == 0.0
+
+unsafe impl Send for Plane {}
+
+impl Hit for Plane {
+    fn hit(&self, ray : &Ray, (tmin, tmax) : (f64, f64)) -> Option<HitRecord> {
+        let nd = self.normal.dot(&ray.direction);
+
+        if nd != 0.0 {
+            let t = self.normal.dot(&self.point) / nd;
+            if tmin < t && t < tmax {
+                Some(HitRecord {
+                    t,
+                    point : ray.direction * t,
+                    normal : self.normal,
+                    reflectance : self.reflectance,
+                    le : self.le,
+                    material : self.material,
+                })
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct Polygon {
     pub points : [Vec3; 3],
     pub material : Material,
     pub reflectance : Vec3,
     pub le : Vec3,
 }
 
-unsafe impl Send for Triangle {}
+unsafe impl Send for Polygon {}
 
-impl Hit for Triangle {
-    fn hit(&self, _ray : &Ray, (_tmin, _tmax) : (f64, f64)) -> Option<HitRecord> {
-        None
+impl Polygon {
+    fn normal(&self) -> Option<Vec3> {
+        let [a, b, c] = self.points;
+        let cross = (b - a).cross(&(c - a));
+        if cross != Vec3::new(0.0) {
+            Some(cross)
+        } else {
+            None
+        }
+    }
+}
+
+impl Hit for Polygon {
+    fn hit(&self, ray : &Ray, (tmin, tmax) : (f64, f64)) -> Option<HitRecord> {
+        if let Some(normal) = self.normal() {
+            let nd = normal.dot(&ray.direction);
+            if nd != 0.0 {
+                let [a, b, c] = self.points;
+                let t = normal.dot(&a) / nd;
+                if tmin < t && t < tmax {
+                    let point = ray.direction * t;
+
+                    let ap = (a - c).cross(&(point - a)).normalize();
+                    let bp = (b - a).cross(&(point - b)).normalize();
+                    let cp = (c - b).cross(&(point - c)).normalize();
+                    
+                    if ap == bp && ap == cp {
+                        Some(HitRecord {
+                            t,
+                            point,
+                            normal,
+                            reflectance : self.reflectance,
+                            le : self.le,
+                            material : self.material,
+                        })
+                    } else {
+                        None
+                    }
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+
         /*
         let op = self.point - ray.origin;
         let b = op.dot(&ray.direction);
