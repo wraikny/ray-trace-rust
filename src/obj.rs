@@ -80,17 +80,17 @@ impl Hit for Sphere {
 }
 
 #[derive(Copy, Clone)]
-pub struct Plane {
+pub struct Triangle {
     pub points : [Vec3; 3],
     pub material : Material,
     pub reflectance : Vec3,
     pub le : Vec3,
 }
 
-unsafe impl Send for Plane {}
+unsafe impl Send for Triangle {}
 
-impl Hit for Plane {
-    fn hit(&self, ray : &Ray, (tmin, tmax) : (f64, f64)) -> Option<HitRecord> {
+impl Hit for Triangle {
+    fn hit(&self, _ray : &Ray, (_tmin, _tmax) : (f64, f64)) -> Option<HitRecord> {
         None
         /*
         let op = self.point - ray.origin;

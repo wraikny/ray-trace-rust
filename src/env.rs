@@ -97,7 +97,7 @@ impl NewCamera<Vec3> for Camera {
 
 pub struct Scene {
     pub spheres : Vec<Sphere>,
-    pub planes : Vec<Plane>
+    pub triangles : Vec<Triangle>
 }
 
 impl Default for Scene {
@@ -133,14 +133,14 @@ fn calc_hit<T : Hit>(v : &Vec<T>, ray : &Ray, tm : (f64, f64)) -> Option<HitReco
 }
 
 impl Scene {
-    pub fn new(spheres : Vec<Sphere>, planes : Vec<Plane>) -> Scene {
-        Scene{spheres, planes}
+    pub fn new(spheres : Vec<Sphere>, triangles : Vec<Triangle>) -> Scene {
+        Scene{spheres, triangles}
     }
 
     pub(crate) fn hit(&self, ray : &Ray, tm : (f64, f64)) -> Option<(HitRecord)> {
         vec![
             calc_hit(&self.spheres, ray, tm),
-            calc_hit(&self.planes, ray, tm)
+            calc_hit(&self.triangles, ray, tm)
         ].into_par_iter().reduce(|| None, compare_hitrecord)
     }
 }
