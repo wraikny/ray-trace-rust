@@ -6,14 +6,20 @@
 を受講して、Rustでレイトレーシングを実装しました！
 
 ## result
-
+サンプリング 3000, 反射回数 20  
 ![result-3000-20](img/png/result1-3000-20.png)
 
+サンプリング 2000, 反射回数 20  
+![result-2000-20](img/png/result2-2000-20.png)
+
+サンプリング 5000, 反射回数 50  
+![result-5000-50](img/png/result3-5000-50.png)
+
 Normal, Reflectance, Depth
-![result2-dnc](img/png/result1-DepthNormalColor.png)
+![result-dnc](img/png/result1-DepthNormalColor.png)
 
 Normal, Reflectance
-![result2-nc](img/png/result1-NormalColor.png)
+![result-nc](img/png/result1-NormalColor.png)
 
 Depth
-![result2-d](img/png/result1-Depth.png)
+![result-d](img/png/result1-Depth.png)
